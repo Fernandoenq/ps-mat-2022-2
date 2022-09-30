@@ -29,6 +29,10 @@ controller.create = async(req, res) => {
         //apaga o campo "senha" para não disparar validação do sequelize
         delete req.body.senha 
 
+        //se o usuário nao for adm o valor do campo admin do usuário que está sendo criado nao pode ser true
+        if(! req.infoLogado.admin) {
+            req.body.admin = false
+        }
 
         await Usuario.create(req.body)
         // HTTP 201: Created
@@ -43,9 +47,23 @@ controller.create = async(req, res) => {
 
 controller.retrieve = async (req, res) => {
     try {
-        const result = await Usuario.scope('semSenha').findAll()
-        // HTTP 200: OK (implícito)
-        res.send(result)
+        
+
+        //se o usuário logado nao for admin, o único registro retornado deve ser o dele mesmo
+        let result;
+        if(req.infoLogado.admin){
+            //retorna todos os usários cadastrados
+            result = await Usuario.scope('semSenha').findAll()
+        }else{
+            //Não-admins só podem ter acesso ao próprio registro
+            result = await Usuario.scope('semSenha').findAll({
+                where: {id: req.infoLogado.id }
+            })
+        }
+
+
+          // HTTP 200: OK (implícito)
+          res.send(result)
     }
     catch(error) {
         console.error(error)
@@ -56,6 +74,12 @@ controller.retrieve = async (req, res) => {
 
 controller.retrieveOne = async (req, res) => {
     try {
+        //Usuário não admin só podem ter acesso ao próprio registro
+        if(! (red.infoLogado.admin) && req.infoLogado.id != req.params.id){
+            //HTTP 403: forbidden
+            return res.sendStatus(403).end()
+        }
+
         const result = await Usuario.scope('semSenha').findByPk(req.params.id)
 
         if(result) {
@@ -77,6 +101,11 @@ controller.retrieveOne = async (req, res) => {
 controller.update = async (req, res) => {
     //console.log('==============>', req.params.id)
     try {
+        //Usuário não admin só podem ter acesso ao próprio registro
+        if(! (red.infoLogado.admin) && req.infoLogado.id != req.params.id){
+            //HTTP 403: forbidden
+            return res.sendStatus(403).end()
+        }
         //Se o campo "senha" existir em req.body
         //precisamos gerar a versão criptografada
         // da nova senha
@@ -108,6 +137,11 @@ controller.update = async (req, res) => {
 
 controller.delete = async (req, res) => {
     try {
+        //Usuário não admin só podem ter acesso ao próprio registro
+        if(! (red.infoLogado.admin) && req.infoLogado.id != req.params.id){
+            //HTTP 403: forbidden
+            return res.sendStatus(403).end()
+        }
         const response = await Usuario.destroy(
             { where: { id: req.params.id } }
         )
