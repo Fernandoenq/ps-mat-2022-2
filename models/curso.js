@@ -43,6 +43,15 @@ updatedAt: {
 }, {
     tableName: 'cursos'
 });
+// Chaves estrangeiras
+model.associate = models => {
+  
+  model.belongsTo(models.Turma, {
+    foreignKey: 'curso_id',
+    targetKey: 'id'
+  })
+}
+
 
 // Cria a tabela no banco de dados, caso ainda não exista
 model.sync()

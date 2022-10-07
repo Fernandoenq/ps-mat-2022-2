@@ -1,3 +1,6 @@
+// professor@faustocintra.com.br, abc123
+// estag@empresa.com.br, Deu$
+
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 
@@ -16,23 +19,31 @@ const controller = {}       // Objeto vazio
 
 controller.create = async(req, res) => {
     try {
-        if(! req.body.senha) return res.status(500).send({
 
-            //O usuario precisa ter passado um campo chamado senha
+        // O usuário precisa ter passado um campo chamado
+        // "senha"
+        if(! req.body.senha) return res.status(500).send({
             message: 'Um campo "senha" deve ser fornecido'
         })
 
-        //Encripta a senha aberta passada no campo "senha"
-        //gerandi o campo "hash senha"
+        // Encripta a senha aberta passada no campo "senha"
+        // gerando o campo "hash_senha"
         req.body.hash_senha = await bcrypt.hash(req.body.senha, 12)
 
-        //apaga o campo "senha" para não disparar validação do sequelize
-        delete req.body.senha 
+        // Apaga o campo "senha" para não disparar validação do
+        // Sequelize
+        delete req.body.senha
 
-        //se o usuário nao for adm o valor do campo admin do usuário que está sendo criado nao pode ser true
-        if(! req.infoLogado.admin) {
-            req.body.admin = false
+        // Se o usuário logado não for admin, o valor do campo
+        // admin do usuário que está sendo criado não pode ser
+        // true
+        if(req.infoLogado) {
+            if(! req.infoLogado.admin) req.body.admin = false
         }
+        // Se não tiver o campo infoLogado no req, significa que
+        // o acesso foi feito sem token. Nesse caso, também não
+        // podemos criar um usuário admin
+        else req.body.admin = false
 
         await Usuario.create(req.body)
         // HTTP 201: Created
@@ -47,23 +58,23 @@ controller.create = async(req, res) => {
 
 controller.retrieve = async (req, res) => {
     try {
-        
 
-        //se o usuário logado nao for admin, o único registro retornado deve ser o dele mesmo
-        let result;
-        if(req.infoLogado.admin){
-            //retorna todos os usários cadastrados
+        // Se o usuário logado não for admin, o único registro
+        // retornado deve ser o dele mesmo
+        let result
+        if(req.infoLogado.admin) {
+            // Retorna todos os usuários cadastrados
             result = await Usuario.scope('semSenha').findAll()
-        }else{
-            //Não-admins só podem ter acesso ao próprio registro
+        }
+        else {
+            // Não-admins só podem ter acesso ao próprio registro
             result = await Usuario.scope('semSenha').findAll({
-                where: {id: req.infoLogado.id }
+                where: { id: req.infoLogado.id }
             })
         }
 
-
-          // HTTP 200: OK (implícito)
-          res.send(result)
+        // HTTP 200: OK (implícito)
+        res.send(result)
     }
     catch(error) {
         console.error(error)
@@ -74,9 +85,14 @@ controller.retrieve = async (req, res) => {
 
 controller.retrieveOne = async (req, res) => {
     try {
-        //Usuário não admin só podem ter acesso ao próprio registro
-        if(! (red.infoLogado.admin) && req.infoLogado.id != req.params.id){
-            //HTTP 403: forbidden
+
+        console.log('req.infoLogado.admin:', req.infoLogado.admin)
+        console.log('req.infoLogado.id:', req.infoLogado.id, typeof req.infoLogado.id)
+        console.log('req.params.id:', req.params.id, typeof req.params.id)
+
+        // Usuário não-admins só podem ter acesso ao próprio registro
+        if(! (req.infoLogado.admin) && req.infoLogado.id != req.params.id) {
+            // HTTP 403: Forbidden
             return res.sendStatus(403).end()
         }
 
@@ -99,20 +115,22 @@ controller.retrieveOne = async (req, res) => {
 }
 
 controller.update = async (req, res) => {
-    //console.log('==============>', req.params.id)
     try {
-        //Usuário não admin só podem ter acesso ao próprio registro
-        if(! (red.infoLogado.admin) && req.infoLogado.id != req.params.id){
-            //HTTP 403: forbidden
+
+        // Usuário não-admins só podem ter acesso ao próprio registro
+        if(! (req.infoLogado.admin) && req.infoLogado.id != req.params.id) {
+            // HTTP 403: Forbidden
             return res.sendStatus(403).end()
         }
-        //Se o campo "senha" existir em req.body
-        //precisamos gerar a versão criptografada
+
+        // Se o campo "senha" existir em req.body,
+        // precisamos gerar a versão criptografada
         // da nova senha
-        if(req.body.senha){
-            req.body.hash_senha = becrypt.hash(req.body.senha, 12)
+        if(req.body.senha) {
+            req.body.hash_senha = bcrypt.hash(req.body.senha, 12)
             delete req.body.senha
         }
+
         const response = await Usuario.update(
             req.body, 
             { where: { id: req.params.id } }
@@ -137,11 +155,13 @@ controller.update = async (req, res) => {
 
 controller.delete = async (req, res) => {
     try {
-        //Usuário não admin só podem ter acesso ao próprio registro
-        if(! (red.infoLogado.admin) && req.infoLogado.id != req.params.id){
-            //HTTP 403: forbidden
+
+        // Usuário não-admins só podem ter acesso ao próprio registro
+        if(! (req.infoLogado.admin) && req.infoLogado.id != req.params.id) {
+            // HTTP 403: Forbidden
             return res.sendStatus(403).end()
         }
+
         const response = await Usuario.destroy(
             { where: { id: req.params.id } }
         )
@@ -175,18 +195,19 @@ controller.login = async (req, res) => {
             let senhaOk = await bcrypt.compare(req.body.senha, usuario.hash_senha)
 
             if(senhaOk) {
+                console.log({usuario})
                 // Gera e retorna o token
                 const token = jwt.sign(
                     {
-                    id: usuario.id,
-                    nome: usuario.nome,
-                    email: usuario.email,
-                    admin: usuario.admin,
-                    data_nasc: usuario.data_nasc    
-                },
-                process.env.TOKEN_SECRET,
-                {expiresIn: '8h'}
-            )
+                        id: usuario.id,
+                        nome: usuario.nome,
+                        email: usuario.email,
+                        admin: usuario.admin,
+                        data_nasc: usuario.data_nasc
+                    }, 
+                    process.env.TOKEN_SECRET,
+                    { expiresIn: '8h' } 
+                )
                 // HTTP 200: OK (implícito)
                 res.json({ auth: true, token })
             }

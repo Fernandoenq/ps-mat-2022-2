@@ -1,11 +1,14 @@
-const Professor = require('../models/professor');
+const turma = require('../models/turma');
+
+const Curso = require('../models/curso')
+const Professor = require('../models/professor')
 
 const controller = {}
 
 
 controller.create = async(req, res) => {
     try{
-        await Professor.create(req.body)
+        await turma.create(req.body)
         //HTTP 201: Created
         res.status(201).end();
     }
@@ -19,7 +22,7 @@ controller.create = async(req, res) => {
 controller.retriveOne = async (req, res) => {
 
     try {
-        const result = await Professor.findByPk(req.params.id);
+        const result = await turma.findByPk(req.params.id);
         // HTTP 200: OK (implícito)
         !result && res.status(404).end;
         res.send(result)
@@ -34,7 +37,9 @@ controller.retriveOne = async (req, res) => {
 
 controller.retrieve = async (req, res) => {
     try {
-        const result = await Professor.findAll()
+        const result = await turma.findAll({
+            include: { model: Curso }
+        })
         // HTTP 200: OK (implícito)
         res.send(result)
     }
@@ -48,7 +53,7 @@ controller.retrieve = async (req, res) => {
 controller.update = async (req, res) =>{
 
     try {
-        const response = await Professor.update(
+        const response = await turma.update(
             req.body,
             {where : {id: req.params.id}}
         )
@@ -69,7 +74,7 @@ controller.update = async (req, res) =>{
 controller.delete = async (req, res) =>{
     try {
         
-        const response = await Professor.destroy(
+        const response = await turma.destroy(
             {
                 where: {id : req.params.id}
             }
