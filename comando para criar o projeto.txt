@@ -47,3 +47,6 @@ troque no package.json
 "start": "node ./bin/www"
 para
 "start": "npx nodemon ./bin/www"
+
+
+npx sequelize-cli db:migrate (cria todas as tabelas)
