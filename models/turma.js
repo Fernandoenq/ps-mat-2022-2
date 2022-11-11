@@ -17,17 +17,18 @@ module.exports = (sequelize, DataTypes) => {
         as: 'curso'
       })
   
-      this.belongsTo(models.Professor, {//tuma tem 1 professor
+      this.belongsTo(models.Professor, {
         foreignKey: 'professor_id',
         targetKey: 'id',
         as: 'professor'
       })
 
-      this.hasMany(models.Aluno, {//turma tem vários alunos
+      this.hasMany(models.Aluno, {
         foreignKey: 'turma_id',
         targetKey: 'id',
         as: 'alunos'
       })
+
     }
   }
   Turma.init({

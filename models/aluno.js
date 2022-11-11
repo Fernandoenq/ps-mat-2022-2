@@ -10,12 +10,12 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-        this.belongsTo(models.Turma, {
-            foreignKey: 'aluno_id',
-            targetKey: 'id',
-            as: 'turmas'
-          })
       // define association here
+      this.belongsTo(models.Turma, {
+        foreignKey: 'turma_id',
+        targetKey: 'id',
+        as: 'turma'
+      })
     }
   }
   Aluno.init({
@@ -72,10 +72,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     email: {
         type: DataTypes.STRING(50),
-        allowNull: false
-    },
-    turma: {
-        type: DataTypes.CHAR(5),
         allowNull: false
     }
   }, {
