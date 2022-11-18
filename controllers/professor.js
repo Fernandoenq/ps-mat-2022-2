@@ -1,6 +1,6 @@
-const {Professor, Turma} = require('../models');
-const turma = require('../models/turma');
-
+//const {Professor, Turma} = require('../models');
+//const turma = require('../models/turma');
+const { Professor, Turma } = require('../models');
 const controller = {}
 
 

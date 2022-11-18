@@ -1,4 +1,5 @@
-const cursos = require('../models/curso')
+//const cursos = require('../models/curso')
+const { Cursos, Turma } = require('../models')
 
 const controller = {}       // Objeto vazio
 
