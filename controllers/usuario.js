@@ -219,6 +219,7 @@ controller.login = async (req, res) => {
                         sameSite:'None'
                     }).status(200).json({auth: true})
                 // HTTP 200: OK (implícito)
+                console.log({'res.cookie': res.cookie})
                 
             }
             else {  // Senha inválida
