@@ -23,7 +23,9 @@ var usersRouter = require('./routes/users');
 var app = express();
 
 const cors = require('cors')
-app.use(cors())
+app.use(cors({
+    origin:'https://agoravai-escolas-fernando.onrender.com'
+}))
 
 app.use(logger('dev'));
 app.use(express.json());
