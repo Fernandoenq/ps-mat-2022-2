@@ -209,13 +209,26 @@ controller.login = async (req, res) => {
                     process.env.TOKEN_SECRET,
                     { expiresIn: '8h' } 
                 )
+                //token sendo retornado no corpo da resposta
+                //res.json({ auth: true, token })
+                
+                //token retornando em um cookie seguro (HTTP only)
+                res.cookie('app-data', token,{
+                        hhtpOnly: true,
+                        secure: true
+                    }).status(200).json({auth: true})
                 // HTTP 200: OK (implícito)
-                res.json({ auth: true, token })
+                
             }
             else {  // Senha inválida
-                // HTTP 401: Unauthorized
+                //HTTP 401: Unauthorized
+                
                 res.status(401).end()
+
+                
+                
             }
+
         }
     }
     catch(error) {
@@ -223,6 +236,10 @@ controller.login = async (req, res) => {
         // HTTP 500: Internal Server Error
         res.status(500).send(error)
     }
+}
+
+controller.logout = (req, res)=> {
+    res.clearCookie('app-data').status(200).json({auth:false})
 }
 
 module.exports = controller

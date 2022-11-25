@@ -1,5 +1,6 @@
 const { Curso, Turma } = require('../models')
 
+
 const controller = {}       // Objeto vazio
 
 /*
