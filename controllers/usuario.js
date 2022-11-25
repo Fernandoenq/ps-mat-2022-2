@@ -215,7 +215,8 @@ controller.login = async (req, res) => {
                 //token retornando em um cookie seguro (HTTP only)
                 res.cookie('app-data', token,{
                         hhtpOnly: true,
-                        secure: true
+                        secure: true,
+                        sameSite:'lax'
                     }).status(200).json({auth: true})
                 // HTTP 200: OK (implícito)
                 
