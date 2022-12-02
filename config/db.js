@@ -19,7 +19,7 @@ catch (error) {
     process.exit(1)     // Encerra o servidor
 }
 
-module.exports = sequelize
+//module.exports = sequelize
 
 /* async function connect() {
 
